@@ -22,11 +22,13 @@ app.add_middleware(
 
 
 @app.get("/health")
+@app.get("/api/health")
 async def health():
     return {"status": "ok"}
 
 
 @app.post("/process")
+@app.post("/api/process")
 async def process_excel(
     file: UploadFile = File(...),
     base_url: str = Form(...),
