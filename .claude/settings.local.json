@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /Users/lalit.tak/Documents/Workspace/Test_link/frontend && npm install 2>&1)",
+      "Bash(cd /Users/lalit.tak/Documents/Workspace/Test_link/backend && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt 2>&1)",
+      "Bash(cd /Users/lalit.tak/Documents/Workspace/Test_link/backend && source venv/bin/activate && pip install -r requirements.txt 2>&1)",
+      "Bash(vercel:*)"
+    ]
+  }
+}
