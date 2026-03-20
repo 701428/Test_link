@@ -1,6 +1,85 @@
 import { useState } from "react";
+import ExcelJS from "exceljs";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "/api";
+function buildSheetUrl(baseUrl, sheetName) {
+  try {
+    const parsed = new URL(baseUrl);
+    const params = new URLSearchParams(parsed.search);
+    if (params.has("id")) {
+      const basePath = params.get("id").replace(/\/$/, "");
+      const fullPath = basePath + "/" + sheetName;
+      const encodedPath = encodeURIComponent(fullPath);
+      let newSearch = "id=" + encodedPath;
+      params.forEach((v, k) => {
+        if (k !== "id") newSearch += "&" + encodeURIComponent(k) + "=" + encodeURIComponent(v);
+      });
+      return parsed.origin + parsed.pathname + "?" + newSearch;
+    }
+  } catch {}
+  return baseUrl.replace(/\/$/, "") + "/" + sheetName;
+}
+
+async function processExcelClientSide(file, baseUrl) {
+  const arrayBuffer = await file.arrayBuffer();
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(arrayBuffer);
+
+  const results = [];
+
+  workbook.eachSheet((worksheet) => {
+    const sheetName = worksheet.name;
+    let linked = false;
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (linked) return;
+      row.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+        if (linked) return;
+        const raw = cell.value;
+        const text =
+          raw === null || raw === undefined
+            ? ""
+            : typeof raw === "object" && raw.text
+            ? raw.text
+            : String(raw);
+
+        if (text.trim().toLowerCase() === "test report path") {
+          const targetRow = rowNumber;
+          const targetCol = colNumber + 1;
+          const folderUrl = buildSheetUrl(baseUrl, sheetName);
+
+          // Unmerge the target cell if it is part of a merged region
+          const targetCell = worksheet.getCell(targetRow, targetCol);
+          if (targetCell.isMerged) {
+            try {
+              const masterAddr = targetCell.master.address;
+              const mergeEntry = worksheet._merges && worksheet._merges[masterAddr];
+              if (mergeEntry) {
+                const m = mergeEntry.model;
+                worksheet.unMergeCells(m.top, m.left, m.bottom, m.right);
+              }
+            } catch (_) {
+              // ignore unmerge errors
+            }
+          }
+
+          const tc = worksheet.getCell(targetRow, targetCol);
+          tc.value = { text: sheetName, hyperlink: folderUrl };
+          tc.font = { color: { argb: "FF0563C1" }, underline: true };
+
+          results.push({ sheet: sheetName, url: folderUrl, status: "linked" });
+          linked = true;
+        }
+      });
+    });
+
+    if (!linked) {
+      results.push({ sheet: sheetName, url: null, status: "Test Report path label not found" });
+    }
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  return { buffer, results };
+}
 
 export default function App() {
   const [file, setFile] = useState(null);
@@ -10,19 +89,10 @@ export default function App() {
   const [results, setResults] = useState(null);
   const [dragOver, setDragOver] = useState(false);
 
-  const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB (Vercel serverless limit is 4.5 MB)
-
   const handleFile = (f) => {
     if (!f) return;
     if (!f.name.endsWith(".xlsx")) {
       setStatus({ type: "error", msg: "Please upload an .xlsx file." });
-      return;
-    }
-    if (f.size > MAX_FILE_SIZE) {
-      setStatus({
-        type: "error",
-        msg: `File too large (${(f.size / 1024 / 1024).toFixed(1)} MB). Maximum allowed size is 4 MB due to server limits.`,
-      });
       return;
     }
     setFile(f);
@@ -45,47 +115,19 @@ export default function App() {
     setStatus({ type: "info", msg: "Processing your Excel file…" });
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("base_url", baseUrl.trim());
+      const { buffer, results: res } = await processExcelClientSide(file, baseUrl.trim());
 
-      let resp;
-      try {
-        resp = await fetch(`${BACKEND_URL}/process`, {
-          method: "POST",
-          body: formData,
-        });
-      } catch (networkErr) {
-        throw new Error(`Cannot reach backend at ${BACKEND_URL}. Make sure the backend server is running. (${networkErr.message})`);
-      }
-
-      if (!resp.ok) {
-        if (resp.status === 413) {
-          throw new Error(
-            "File too large (HTTP 413). The server rejected the upload because the file exceeds the 4.5 MB limit. Please reduce the file size and try again."
-          );
-        }
-        let detail = `Server error ${resp.status}`;
-        try { const err = await resp.json(); detail = err.detail || detail; } catch {}
-        throw new Error(detail);
-      }
-
-      const data = await resp.json();
-
-      // Trigger download from base64
-      const byteChars = atob(data.file);
-      const byteArr = new Uint8Array(byteChars.length);
-      for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
-      const blob = new Blob([byteArr], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = data.filename;
+      a.download = file.name.replace(".xlsx", "_linked.xlsx");
       a.click();
       URL.revokeObjectURL(url);
 
-      if (data.results) setResults(data.results);
-
+      setResults(res);
       setStatus({
         type: "success",
         msg: "Done! Your updated Excel file has been downloaded. Upload it back to SharePoint to replace the original.",
@@ -136,7 +178,7 @@ export default function App() {
             <div className="drop-hint">
               <span className="drop-icon">⬆</span>
               <span>Click to upload or drag & drop</span>
-              <span className="drop-sub">.xlsx files only · max 4 MB</span>
+              <span className="drop-sub">.xlsx files only</span>
             </div>
           )}
         </div>
