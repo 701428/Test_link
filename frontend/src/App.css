@@ -185,6 +185,158 @@ h1 {
 .file-name { font-weight: 600; color: #0f172a; font-size: 14px; }
 .file-size { color: #64748b; font-size: 13px; }
 
+/* ── Top Nav ─────────────────────────────────────────────────── */
+.topnav {
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topnav-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+}
+.topnav-brand {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.topnav-links {
+  display: flex;
+  gap: 4px;
+}
+.topnav-link {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.topnav-link:hover  { background: #1e293b; color: #f1f5f9; }
+.topnav-link.active { background: #0078d4; color: #fff; }
+
+/* ── Doc pages shared ────────────────────────────────────────── */
+.doc-page header { margin-bottom: 24px; }
+
+.doc-badge {
+  display: inline-block;
+  background: #dce9f9;
+  color: #004e8c;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.doc-list {
+  padding-left: 18px;
+  margin: 0;
+}
+.doc-list li {
+  font-size: 13.5px;
+  color: #334155;
+  line-height: 1.65;
+  margin-bottom: 8px;
+}
+.doc-list li:last-child { margin-bottom: 0; }
+
+/* Callouts */
+.callout {
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 10px;
+}
+.callout-warning { background: #fff8e1; border-left: 3px solid #f0c040; color: #7c5e00; }
+.callout-info    { background: #dce9f9; border-left: 3px solid #0078d4; color: #004e8c; }
+
+/* Step rows */
+.doc-step {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.doc-step:last-child { margin-bottom: 0; }
+.doc-step-num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background: #0078d4;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+.doc-step-body { flex: 1; }
+.doc-step-body strong { font-size: 14px; color: #0f172a; display: block; margin-bottom: 4px; }
+
+/* ── Release cards ───────────────────────────────────────────── */
+.release-card { border-left: 4px solid #0078d4; }
+
+.release-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.release-version {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.release-date {
+  font-size: 13px;
+  color: #64748b;
+}
+.release-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 9px;
+  border-radius: 20px;
+}
+.tag-latest  { background: #dff6dd; color: #107c10; }
+.tag-initial { background: #f1f5f9; color: #475569; }
+
+.release-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 14px;
+}
+.release-section { margin-bottom: 14px; }
+.release-section:last-child { margin-bottom: 0; }
+.release-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #0078d4;
+  margin-bottom: 8px;
+}
+
 /* Spinner */
 .spinner {
   display: inline-block;
