@@ -1,9 +1,27 @@
+import { useState } from "react";
+import { downloadPdf } from "./pdfUtils";
+
 const SITE_URL = "https://test-link-navy.vercel.app";
 const REPO_URL = "https://github.com/701428/Test_link";
 
 export default function ReleaseNotes({ setPage }) {
+  const [exporting, setExporting] = useState(false);
+
+  const handlePdf = async () => {
+    setExporting(true);
+    await downloadPdf("release-notes-content", "SharePoint_Test_Report_Linker_Release_Notes.pdf");
+    setExporting(false);
+  };
+
   return (
     <div className="container doc-page">
+      <div className="pdf-toolbar">
+        <button className="btn btn-pdf" onClick={handlePdf} disabled={exporting}>
+          {exporting ? "Generating PDF…" : "⬇ Download PDF"}
+        </button>
+      </div>
+
+      <div id="release-notes-content">
       <header>
         <div className="doc-badge">Release Notes</div>
         <h1>SharePoint Test Report Linker</h1>
@@ -162,6 +180,8 @@ export default function ReleaseNotes({ setPage }) {
           </ul>
         </div>
       </section>
+
+      </div>{/* end #release-notes-content */}
 
       <div style={{ textAlign: "center", marginTop: 32 }}>
         <button className="btn btn-primary" onClick={() => setPage("home")}>

@@ -185,6 +185,26 @@ h1 {
 .file-name { font-weight: 600; color: #0f172a; font-size: 14px; }
 .file-size { color: #64748b; font-size: 13px; }
 
+/* ── PDF toolbar ─────────────────────────────────────────────── */
+.pdf-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+.btn-pdf {
+  background: #0f172a;
+  color: #fff;
+  font-size: 13px;
+  padding: 7px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+.btn-pdf:hover:not(:disabled) { background: #1e293b; }
+.btn-pdf:disabled { background: #94a3b8; cursor: not-allowed; }
+
 /* ── Top Nav ─────────────────────────────────────────────────── */
 .topnav {
   background: #0f172a;

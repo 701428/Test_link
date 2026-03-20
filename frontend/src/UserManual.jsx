@@ -1,8 +1,26 @@
+import { useState } from "react";
+import { downloadPdf } from "./pdfUtils";
+
 const SITE_URL = "https://test-link-navy.vercel.app";
 
 export default function UserManual({ setPage }) {
+  const [exporting, setExporting] = useState(false);
+
+  const handlePdf = async () => {
+    setExporting(true);
+    await downloadPdf("user-manual-content", "SharePoint_Test_Report_Linker_User_Manual.pdf");
+    setExporting(false);
+  };
+
   return (
     <div className="container doc-page">
+      <div className="pdf-toolbar">
+        <button className="btn btn-pdf" onClick={handlePdf} disabled={exporting}>
+          {exporting ? "Generating PDF…" : "⬇ Download PDF"}
+        </button>
+      </div>
+
+      <div id="user-manual-content">
       <header>
         <div className="doc-badge">User Manual</div>
         <h1>SharePoint Test Report Linker</h1>
@@ -233,6 +251,8 @@ export default function UserManual({ setPage }) {
           </tbody>
         </table>
       </section>
+
+      </div>{/* end #user-manual-content */}
 
       <div style={{ textAlign: "center", marginTop: 32 }}>
         <button className="btn btn-primary" onClick={() => setPage("home")}>
