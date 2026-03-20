@@ -10,10 +10,19 @@ export default function App() {
   const [results, setResults] = useState(null);
   const [dragOver, setDragOver] = useState(false);
 
+  const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB (Vercel serverless limit is 4.5 MB)
+
   const handleFile = (f) => {
     if (!f) return;
     if (!f.name.endsWith(".xlsx")) {
       setStatus({ type: "error", msg: "Please upload an .xlsx file." });
+      return;
+    }
+    if (f.size > MAX_FILE_SIZE) {
+      setStatus({
+        type: "error",
+        msg: `File too large (${(f.size / 1024 / 1024).toFixed(1)} MB). Maximum allowed size is 4 MB due to server limits.`,
+      });
       return;
     }
     setFile(f);
@@ -51,6 +60,11 @@ export default function App() {
       }
 
       if (!resp.ok) {
+        if (resp.status === 413) {
+          throw new Error(
+            "File too large (HTTP 413). The server rejected the upload because the file exceeds the 4.5 MB limit. Please reduce the file size and try again."
+          );
+        }
         let detail = `Server error ${resp.status}`;
         try { const err = await resp.json(); detail = err.detail || detail; } catch {}
         throw new Error(detail);
@@ -122,7 +136,7 @@ export default function App() {
             <div className="drop-hint">
               <span className="drop-icon">⬆</span>
               <span>Click to upload or drag & drop</span>
-              <span className="drop-sub">.xlsx files only</span>
+              <span className="drop-sub">.xlsx files only · max 4 MB</span>
             </div>
           )}
         </div>

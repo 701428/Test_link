@@ -15,5 +15,18 @@
     { "src": "/api/(.*)", "dest": "backend/main.py" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "functions": {
+    "backend/main.py": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "x-vercel-no-cache", "value": "1" }
+      ]
+    }
   ]
 }
